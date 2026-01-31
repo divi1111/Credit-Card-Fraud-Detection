@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detection</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Credit Card Fraud Detection Web App</h1>
+            <div class="header-image">
+                <img src="image.png" alt="Credit Card Fraud Detection">
+            </div>
+        </header>
+
+        <section class="about-section">
+            <h2>About</h2>
+            <p>
+                Credit card fraud is a form of identity theft that involves an unauthorized taking of another's credit card information for the purpose of charging purchases to the account or removing funds from it.
+            </p>
+            <p>
+                <strong>This Web App utilizes a Machine Learning model served as an API in order to detect fraudulent credit card transactions based on the following criteria: hours, type of transaction, amount, balance before and after transaction etc.</strong>
+            </p>
+            <p>
+                The API was built with FastAPI and can be found <a href="https://credit-fraud-ml-api.herokuapp.com/" target="_blank">here.</a>
+            </p>
+            
+           
+        </section>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <h3>Input Features of The Transaction</h3>
+                <form id="fraudForm">
+                    <div class="form-group">
+                        <label for="senderName">Sender ID</label>
+                        <input type="text" id="senderName" name="senderName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="receiverName">Receiver ID</label>
+                        <input type="text" id="receiverName" name="receiverName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="step">Number of Hours (0-743)</label>
+                        <input type="range" id="step" name="step" min="0" max="743" value="0">
+                        <span id="stepValue">0</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="types">Type of Transfer Made:</label>
+                        <p class="info-text">
+                            0 = Cash In<br>
+                            1 = Cash Out<br>
+                            2 = Debit<br>
+                            3 = Payment<br>
+                            4 = Transfer
+                        </p>
+                        <select id="types" name="types">
+                            <option value="0">0 - Cash In</option>
+                            <option value="1">1 - Cash Out</option>
+                            <option value="2">2 - Debit</option>
+                            <option value="3">3 - Payment</option>
+                            <option value="4">4 - Transfer</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amount">Amount in $ (0-110000)</label>
+                        <input type="number" id="amount" name="amount" min="0" max="110000" value="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="oldbalanceorg">Sender Balance Before Transaction</label>
+                        <input type="number" id="oldbalanceorg" name="oldbalanceorg" min="0" max="110000" value="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newbalanceorg">Sender Balance After Transaction</label>
+                        <input type="number" id="newbalanceorg" name="newbalanceorg" min="0" max="110000" value="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="oldbalancedest">Recipient Balance Before Transaction</label>
+                        <input type="number" id="oldbalancedest" name="oldbalancedest" min="0" max="110000" value="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newbalancedest">Recipient Balance After Transaction</label>
+                        <input type="number" id="newbalancedest" name="newbalancedest" min="0" max="110000" value="0" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Detection Result</button>
+                </form>
+            </aside>
+
+            <main class="result-section">
+                <div id="resultContainer" class="hidden">
+                    <h3>Transaction Details</h3>
+                    <div id="transactionDetails"></div>
+                    
+                    <div id="predictionResult" class="prediction-result"></div>
+                </div>
+
+                <div id="loadingSpinner" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Analyzing transaction...</p>
+                </div>
+
+                <div id="errorMessage" class="error-message hidden"></div>
+            </main>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>     
