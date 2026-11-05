@@ -33,7 +33,9 @@ app = FastAPI(
 # Restrict origins to your frontend URL before production use.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+    "https://fraudguard-frontend-5dgq.onrender.com"
+],
     allow_credentials=False,
     allow_methods=["GET", "POST"],
     allow_headers=["*"]
