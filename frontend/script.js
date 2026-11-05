@@ -1,5 +1,5 @@
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://fraudguard-api-j4jg.onrender.com";
 
 // Get HTML elements
 const fraudForm = document.getElementById("fraudForm");
