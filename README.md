@@ -156,3 +156,13 @@ The current model was evaluated on a stratified test split of the processed data
 ## Disclaimer
 
 This project is developed for educational and demonstration purposes. It uses synthetic transaction data and should not be used as a production financial fraud prevention system without further validation, testing, and security improvements.
+
+## Live Demo
+
+**Frontend Dashboard:** https://fraudguard-frontend-5dgq.onrender.com/
+
+**Backend API:** https://fraudguard-api-j4jg.onrender.com/
+
+**API Documentation:** https://fraudguard-api-j4jg.onrender.com/docs
+
+The application allows users to submit financial transaction details and receive machine learning-based fraud predictions through an interactive dashboard.
