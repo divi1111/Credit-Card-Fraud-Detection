@@ -1,161 +1,233 @@
-// Update step slider value display
-const stepSlider = document.getElementById('step');
-const stepValue = document.getElementById('stepValue');
 
-stepSlider.addEventListener('input', function() {
-    stepValue.textContent = this.value;
-});
+const API_URL = "http://127.0.0.1:8000";
+
+// Get HTML elements
+const fraudForm = document.getElementById("fraudForm");
+
+const emptyState = document.getElementById("emptyState");
+const loadingState = document.getElementById("loadingState");
+const resultContent = document.getElementById("resultContent");
+const errorMessage = document.getElementById("errorMessage");
+const analyzeBtn = document.getElementById("analyzeBtn");
 
 
-// Transaction type mapping
-const transactionTypes = {
-    0: 'Cash In',
-    1: 'Cash Out',
-    2: 'Debit',
-    3: 'Payment',
-    4: 'Transfer'
-};
+// -----------------------------------------
+// Form submission
+// -----------------------------------------
 
-const backendTransactionTypes = {
-    0: "CASH_IN",
-    1: "CASH_OUT",
-    2: "DEBIT",
-    3: "PAYMENT",
-    4: "TRANSFER"
-};
+fraudForm.addEventListener("submit", async function(event) {
 
-// Form submission handler
-document.getElementById('fraudForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // Get form values
-    const senderName = document.getElementById('senderName').value.trim();
-    const receiverName = document.getElementById('receiverName').value.trim();
-    const step = parseInt(document.getElementById('step').value);
-    const types = parseInt(document.getElementById('types').value);
-    const amount = parseFloat(document.getElementById('amount').value);
-    const oldbalanceorg = parseFloat(document.getElementById('oldbalanceorg').value);
-    const newbalanceorg = parseFloat(document.getElementById('newbalanceorg').value);
-    const oldbalancedest = parseFloat(document.getElementById('oldbalancedest').value);
-    const newbalancedest = parseFloat(document.getElementById('newbalancedest').value);
-    
-    // Validate sender and receiver names
-    if (!senderName || !receiverName) {
-        showError('Error! Please input Transaction ID or Names of Sender and Receiver!');
+    event.preventDefault();
+
+    const requestData = {
+        step: Number(document.getElementById("step").value),
+
+        amount: Number(document.getElementById("amount").value),
+
+        transaction_type:
+            document.getElementById("transaction_type").value,
+
+        origin_account_type:
+            document.getElementById("origin_type").value,
+
+        destination_account_type:
+            document.getElementById("destination_type").value
+    };
+
+    // Basic frontend validation
+    if (
+        !Number.isFinite(requestData.amount) ||
+        requestData.amount < 0 ||
+        !Number.isInteger(requestData.step) ||
+        requestData.step < 1 ||
+        requestData.step > 743
+    ) {
+        showError("Please enter valid transaction details.");
         return;
     }
-    
-    // Calculate isflaggedfraud
-    const isflaggedfraud = amount >= 200000 ? 1 : 0;
-    
-    // Prepare request data
-    const requestData = {
-    step: step,
-    types: backendTransactionTypes[types], // 👈 STRING now
-    amount: amount,
-    oldbalanceorig: oldbalanceorg,
-    newbalanceorig: newbalanceorg,
-    oldbalancedest: oldbalancedest,
-    newbalancedest: newbalancedest,
-    isflaggedfraud: isflaggedfraud
-};
 
-    
-    // Show loading spinner
-    showLoading();
-    
-    try {
-        // Make API request
-        const response = await fetch('http://127.0.0.1:8000/predict', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData)
-        });
-        
-        if (!response.ok) {
-            throw new Error('API request failed');
-        }
-        
-        const result = await response.json();
-        
-        // Display transaction details
-        displayTransactionDetails(
-            senderName,
-            receiverName,
-            step,
-            types,
-            amount,
-            oldbalanceorg,
-            newbalanceorg,
-            oldbalancedest,
-            newbalancedest,
-            isflaggedfraud
-        );
-        
-        // Display prediction result
-        displayPredictionResult(result.prediction, senderName, receiverName, types);
-        
-        hideLoading();
-        
-    } catch (error) {
-        hideLoading();
-        showError('Error connecting to the API. Please check if the API is available and try again.');
-        console.error('Error:', error);
-    }
+    await analyzeTransaction(requestData);
 });
 
-function displayTransactionDetails(sender, receiver, step, type, amount, oldBalSender, newBalSender, oldBalRecipient, newBalRecipient, isFlagged) {
-    const transactionType = transactionTypes[type];
-    
-    const detailsHTML = `
-        <p><strong>Sender ID:</strong> ${sender}</p>
-        <p><strong>Receiver ID:</strong> ${receiver}</p>
-        <p><strong>1. Number of Hours it took to complete:</strong> ${step}</p>
-        <p><strong>2. Type of Transaction:</strong> ${transactionType}</p>
-        <p><strong>3. Amount Sent:</strong> $${amount.toLocaleString()}</p>
-        <p><strong>4. Sender Balance Before Transaction:</strong> $${oldBalSender.toLocaleString()}</p>
-        <p><strong>5. Sender Balance After Transaction:</strong> $${newBalSender.toLocaleString()}</p>
-        <p><strong>6. Recipient Balance Before Transaction:</strong> $${oldBalRecipient.toLocaleString()}</p>
-        <p><strong>7. Recipient Balance After Transaction:</strong> $${newBalRecipient.toLocaleString()}</p>
-        <p><strong>8. System Flag Fraud Status (Transaction amount greater than $200000):</strong> ${isFlagged}</p>
-    `;
-    
-    document.getElementById('transactionDetails').innerHTML = detailsHTML;
+
+// -----------------------------------------
+// Call FastAPI
+// -----------------------------------------
+
+async function analyzeTransaction(data) {
+
+    showLoading();
+
+    analyzeBtn.disabled = true;
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/predict`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(data)
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.detail || "Prediction request failed."
+            );
+        }
+
+        displayResult(result);
+
+    } catch (error) {
+
+        showError(
+            error.message === "Failed to fetch"
+                ? "Cannot connect to the backend. Check whether FastAPI is running."
+                : error.message
+        );
+
+        console.error("Prediction error:", error);
+
+    } finally {
+
+        analyzeBtn.disabled = false;
+    }
 }
 
-function displayPredictionResult(prediction, sender, receiver, type) {
-    const transactionType = transactionTypes[type];
-    const resultDiv = document.getElementById('predictionResult');
-    
-    resultDiv.textContent = `The '${transactionType}' transaction that took place between ${sender} and ${receiver} is ${prediction}.`;
-    
-    // Add appropriate styling based on prediction
-    if (prediction.toLowerCase().includes('fraud')) {
-        resultDiv.className = 'prediction-result fraud';
-    } else {
-        resultDiv.className = 'prediction-result legitimate';
-    }
-    
-    // Show result container
-    document.getElementById('resultContainer').classList.remove('hidden');
+
+// -----------------------------------------
+// Display prediction
+// -----------------------------------------
+
+function displayResult(result) {
+
+    hideAllStates();
+
+    resultContent.classList.remove("hidden");
+
+    const isFraud =
+        result.prediction === "Fraudulent Transaction";
+
+    const score = Number(result.fraud_score);
+    const threshold = Number(result.threshold);
+
+    // Prediction banner
+    const banner = document.getElementById("resultBanner");
+
+    banner.className =
+        isFraud
+            ? "result-banner fraud"
+            : "result-banner legitimate";
+
+    document.getElementById("predictionText").textContent =
+        result.prediction;
+
+    document.getElementById("riskStatus").textContent =
+        result.risk_status;
+
+    // Fraud score
+    document.getElementById("fraudScore").textContent =
+        `${score.toFixed(2)}%`;
+
+    document.getElementById("thresholdValue").textContent =
+        `${(threshold * 100).toFixed(0)}%`;
+
+    const scoreBar = document.getElementById("scoreBar");
+
+    scoreBar.style.width = `${Math.min(100, Math.max(0, score))}%`;
+
+    scoreBar.className =
+        isFraud ? "progress-fill fraud" : "progress-fill";
+
+    // Transaction details
+    document.getElementById("resultAmount").textContent =
+        Number(result.transaction_details.amount).toLocaleString(
+            "en-IN",
+            {
+                style: "currency",
+                currency: "INR"
+            }
+        );
+
+    document.getElementById("resultType").textContent =
+        result.transaction_details.type;
+
+    document.getElementById("resultStep").textContent =
+        result.transaction_details.step;
 }
+
+
+// -----------------------------------------
+// UI state functions
+// -----------------------------------------
+
+function hideAllStates() {
+
+    emptyState.classList.add("hidden");
+    loadingState.classList.add("hidden");
+    resultContent.classList.add("hidden");
+    errorMessage.classList.add("hidden");
+}
+
 
 function showLoading() {
-    document.getElementById('loadingSpinner').classList.remove('hidden');
-    document.getElementById('resultContainer').classList.add('hidden');
-    document.getElementById('errorMessage').classList.add('hidden');
+
+    hideAllStates();
+
+    loadingState.classList.remove("hidden");
 }
 
-function hideLoading() {
-    document.getElementById('loadingSpinner').classList.add('hidden');
-}
 
 function showError(message) {
-    const errorDiv = document.getElementById('errorMessage');
-    errorDiv.textContent = message;
-    errorDiv.classList.remove('hidden');
-    document.getElementById('resultContainer').classList.add('hidden');
-    document.getElementById('loadingSpinner').classList.add('hidden');
+
+    hideAllStates();
+
+    errorMessage.textContent = message;
+
+    errorMessage.classList.remove("hidden");
 }
+
+
+// -----------------------------------------
+// Initial API connection check
+// -----------------------------------------
+
+async function checkAPI() {
+
+    const statusElement =
+        document.querySelector(".system-status");
+
+    try {
+
+        const response = await fetch(`${API_URL}/health`);
+
+        if (!response.ok) {
+            throw new Error("API unavailable");
+        }
+
+        const health = await response.json();
+
+        if (!health.model_loaded) {
+            throw new Error("Model unavailable");
+        }
+
+        statusElement.innerHTML =
+            '<span class="status-dot"></span> API Connected';
+
+    } catch (error) {
+
+        statusElement.textContent = "API Disconnected";
+
+        statusElement.style.color = "#c03939";
+    }
+}
+
+checkAPI();

@@ -1,23 +1,7 @@
-# Credit Card Fraud Detection - Python Dependencies
-# Compatible with Python 3.11+
-
-# Core ML and Data Processing
-scikit-learn>=1.6.0
-numpy>=2.0.0
-pandas>=2.2.0
-
-# Model Persistence
-joblib>=1.4.0
-
-# FastAPI Backend
-fastapi>=0.115.0
-uvicorn[standard]>=0.30.0
-pydantic>=2.10.0
-
-# Optional: Enhanced Performance
-python-multipart>=0.0.9  # For file uploads if needed
-
-# Development Tools (optional, comment out if not needed)
-# pytest>=8.0.0
-# black>=24.0.0
-# flake8>=7.0.0
+scikit-learn==1.8.0
+numpy==2.4.3
+pandas==3.0.1
+joblib==1.5.3
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
+pydantic==2.14.3

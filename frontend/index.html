@@ -1,120 +1,189 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Credit Card Fraud Detection</title>
+    <title>FraudGuard | Financial Fraud Detection</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Credit Card Fraud Detection Web App</h1>
-            <div class="header-image">
-                <img src="image.png" alt="Credit Card Fraud Detection">
-            </div>
-        </header>
 
-        <section class="about-section">
-            <h2>About</h2>
+<div class="app-container">
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-icon">🛡️</div>
+            <div>
+                <h1>FraudGuard</h1>
+                <p>AI Financial Security System</p>
+            </div>
+        </div>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            API Connected
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <p class="eyebrow">MACHINE LEARNING POWERED SECURITY</p>
+            <h2>Financial Transaction Fraud Detection</h2>
             <p>
-                Credit card fraud is a form of identity theft that involves an unauthorized taking of another's credit card information for the purpose of charging purchases to the account or removing funds from it.
+                Analyze financial transactions using machine learning
+                and identify potentially fraudulent activities.
             </p>
-            <p>
-                <strong>This Web App utilizes a Machine Learning model served as an API in order to detect fraudulent credit card transactions based on the following criteria: hours, type of transaction, amount, balance before and after transaction etc.</strong>
-            </p>
-            <p>
-                The API was built with FastAPI and can be found <a href="https://credit-fraud-ml-api.herokuapp.com/" target="_blank">here.</a>
-            </p>
-            
-           
         </section>
 
-        <div class="main-content">
-            <aside class="sidebar">
-                <h3>Input Features of The Transaction</h3>
+        <section class="dashboard">
+
+            <div class="form-card">
+                <div class="section-heading">
+                    <h3>Transaction Analysis</h3>
+                    <p>Enter transaction information below.</p>
+                </div>
+
                 <form id="fraudForm">
+
                     <div class="form-group">
-                        <label for="senderName">Sender ID</label>
-                        <input type="text" id="senderName" name="senderName" required>
+                        <label for="step">Transaction Time (Step)</label>
+                        <input
+                            type="number"
+                            id="step"
+                            min="1"
+                            max="743"
+                            value="100"
+                            required
+                        >
                     </div>
 
                     <div class="form-group">
-                        <label for="receiverName">Receiver ID</label>
-                        <input type="text" id="receiverName" name="receiverName" required>
+                        <label for="amount">Transaction Amount</label>
+                        <input
+                            type="number"
+                            id="amount"
+                            min="0"
+                            step="0.01"
+                            placeholder="Enter amount"
+                            required
+                        >
                     </div>
 
                     <div class="form-group">
-                        <label for="step">Number of Hours (0-743)</label>
-                        <input type="range" id="step" name="step" min="0" max="743" value="0">
-                        <span id="stepValue">0</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="types">Type of Transfer Made:</label>
-                        <p class="info-text">
-                            0 = Cash In<br>
-                            1 = Cash Out<br>
-                            2 = Debit<br>
-                            3 = Payment<br>
-                            4 = Transfer
-                        </p>
-                        <select id="types" name="types">
-                            <option value="0">0 - Cash In</option>
-                            <option value="1">1 - Cash Out</option>
-                            <option value="2">2 - Debit</option>
-                            <option value="3">3 - Payment</option>
-                            <option value="4">4 - Transfer</option>
+                        <label for="transaction_type">Transaction Type</label>
+                        <select id="transaction_type" required>
+                            <option value="PAYMENT">Payment</option>
+                            <option value="TRANSFER">Transfer</option>
+                            <option value="CASH_OUT">Cash Out</option>
+                            <option value="DEBIT">Debit</option>
+                            <option value="CASH_IN">Cash In</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="amount">Amount in $ (0-110000)</label>
-                        <input type="number" id="amount" name="amount" min="0" max="110000" value="0" required>
+                        <label for="origin_type">Origin Account Type</label>
+                        <select id="origin_type">
+                            <option value="C">Customer</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="oldbalanceorg">Sender Balance Before Transaction</label>
-                        <input type="number" id="oldbalanceorg" name="oldbalanceorg" min="0" max="110000" value="0" required>
+                        <label for="destination_type">Destination Account Type</label>
+                        <select id="destination_type">
+                            <option value="C">Customer</option>
+                            <option value="M">Merchant</option>
+                        </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="newbalanceorg">Sender Balance After Transaction</label>
-                        <input type="number" id="newbalanceorg" name="newbalanceorg" min="0" max="110000" value="0" required>
-                    </div>
+                    <button type="submit" id="analyzeBtn">
+                        Analyze Transaction
+                    </button>
 
-                    <div class="form-group">
-                        <label for="oldbalancedest">Recipient Balance Before Transaction</label>
-                        <input type="number" id="oldbalancedest" name="oldbalancedest" min="0" max="110000" value="0" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="newbalancedest">Recipient Balance After Transaction</label>
-                        <input type="number" id="newbalancedest" name="newbalancedest" min="0" max="110000" value="0" required>
-                    </div>
-
-                    <button type="submit" class="submit-btn">Detection Result</button>
                 </form>
-            </aside>
+            </div>
 
-            <main class="result-section">
-                <div id="resultContainer" class="hidden">
-                    <h3>Transaction Details</h3>
-                    <div id="transactionDetails"></div>
-                    
-                    <div id="predictionResult" class="prediction-result"></div>
+            <div class="result-card">
+
+                <div class="section-heading">
+                    <h3>Detection Results</h3>
+                    <p>Machine learning prediction output.</p>
                 </div>
 
-                <div id="loadingSpinner" class="loading hidden">
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <h3>Awaiting Transaction</h3>
+                    <p>Enter transaction details and click Analyze Transaction.</p>
+                </div>
+
+                <div id="loadingState" class="loading hidden">
                     <div class="spinner"></div>
                     <p>Analyzing transaction...</p>
                 </div>
 
-                <div id="errorMessage" class="error-message hidden"></div>
-            </main>
-        </div>
-    </div>
+                <div id="resultContent" class="hidden">
 
-    <script src="script.js"></script>
+                    <div id="resultBanner" class="result-banner">
+                        <h3 id="predictionText">Prediction</h3>
+                        <p id="riskStatus">Risk status</p>
+                    </div>
+
+                    <div class="score-section">
+                        <div class="score-header">
+                            <span>Model Fraud Risk Score</span>
+                            <strong id="fraudScore">0%</strong>
+                        </div>
+
+                        <div class="progress-track">
+                            <div id="scoreBar" class="progress-fill"></div>
+                        </div>
+
+                        <p class="threshold-text">
+                            Classification threshold:
+                            <strong id="thresholdValue">75%</strong>
+                        </p>
+                    </div>
+
+                    <div class="details-section">
+                        <h4>Transaction Summary</h4>
+
+                        <div class="detail-row">
+                            <span>Amount</span>
+                            <strong id="resultAmount">-</strong>
+                        </div>
+
+                        <div class="detail-row">
+                            <span>Transaction Type</span>
+                            <strong id="resultType">-</strong>
+                        </div>
+
+                        <div class="detail-row">
+                            <span>Transaction Step</span>
+                            <strong id="resultStep">-</strong>
+                        </div>
+                    </div>
+
+                    <div class="disclaimer">
+                        This is a machine learning risk score, not a
+                        confirmed fraud determination.
+                    </div>
+
+                </div>
+
+                <div id="errorMessage" class="error-message hidden"></div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <footer>
+        <p>FraudGuard | Machine Learning Based Financial Fraud Detection</p>
+        <p>For demonstration and educational purposes.</p>
+    </footer>
+
+</div>
+
+<script src="script.js"></script>
 </body>
-</html>     
+</html>

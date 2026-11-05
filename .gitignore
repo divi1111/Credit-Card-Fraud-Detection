@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Datasets
+data/raw/
+data/processed/
+
+# Model artifacts
+*.joblib
+!backend/model.joblib
